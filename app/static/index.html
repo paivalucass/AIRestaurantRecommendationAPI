@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Restaurant Recommendation</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>AI Restaurant Recommender</h1>
+
+        <div class="form">
+            <input id="query" type="text" placeholder="What are you in the mood for? (e.g. sushi, cheap pizza…)">
+
+            <input id="lat" type="number" step="0.000001" placeholder="Your Latitude">
+            <input id="lon" type="number" step="0.000001" placeholder="Your Longitude">
+
+            <button onclick="recommend()">Recommend</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
