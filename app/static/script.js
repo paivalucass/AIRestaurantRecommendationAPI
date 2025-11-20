@@ -1,4 +1,3 @@
-
 function getLocation() {
     if (!navigator.geolocation) {
         alert("Geolocation is not supported by your browser.");
@@ -30,13 +29,12 @@ async function recommend() {
     }
 
     const res = await fetch(
-        `/recommend?query=${encodeURIComponent(query)}&user_lat=${lat}&user_lon=${lon}`
+        `/recommend?query=${encodeURIComponent(query)}&user_lat=${lat}&user_lon=${lon}&radius=20000`
     );
 
     const data = await res.json();
     console.log("API response:", data);
 
-    // Accept both: `[{}, {}]` or `{results: [...]}` 
     const results = Array.isArray(data) ? data : data.results;
 
     const resultsDiv = document.getElementById("results");
@@ -51,11 +49,14 @@ async function recommend() {
         const div = document.createElement("div");
         div.className = "restaurant";
         div.innerHTML = `
-            <h2>${r["Restaurant Name"]}</h2>
-            <p><strong>Cuisines:</strong> ${r.Cuisines}</p>
-            <p><strong>Rating:</strong> ${r["Aggregate rating"]} (${r["Rating text"]})</p>
+            <h2>${r["name"]}</h2>
+            <p><strong>Cuisines:</strong> ${r.cuisine}</p>
+            <p><strong>Rating (Distance + AI match):</strong> ${r.final_score?.toFixed(2)}</p>
             <p><strong>Distance:</strong> ${r.distance_km?.toFixed(2) ?? "?"} km</p>
-            <p><strong>Address:</strong> ${r.Address}</p>
+            <p><strong>Opening Hours:</strong> ${r["opening_hours"]}</p>
+            <p><strong>City:</strong> ${r["city"]}</p>
+            <p><strong>Street:</strong> ${r["street"]}</p>
+            <p><strong>Neighborhood:</strong> ${r["neighborhood"]}</p>
         `;
         resultsDiv.appendChild(div);
     });

@@ -3,7 +3,7 @@ import pandas as pd
 import json
 import torch
 from sentence_transformers import SentenceTransformer
-from app.utils.text_cleaning import clean_text
+from text_cleaning import clean_text
 import faiss
 import numpy as np
 

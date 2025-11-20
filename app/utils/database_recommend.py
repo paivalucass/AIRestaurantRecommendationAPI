@@ -9,7 +9,7 @@ PROCESSED_PATH = "app/data/processed.json"
 FAISS_INDEX = faiss.read_index("app/data/faiss.index")
 
 
-class RestaurantRecommender:
+class DatabaseRestaurantRecommender:
     def __init__(self):
         print("Loading model...")
         self.model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -18,7 +18,7 @@ class RestaurantRecommender:
         with open(PROCESSED_PATH) as f:
             self.db = json.load(f)
 
-    def recommend_restaurants(self, query, user_lat, user_lon, k=3):        
+    def recommend(self, query, user_lat, user_lon, k=3):        
         # Encode user query
         query_emb = self.model.encode(query, convert_to_numpy=True).astype("float32")
 

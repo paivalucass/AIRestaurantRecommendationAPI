@@ -2,13 +2,13 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from app.recommend import RestaurantRecommender
+from app.osm_recommend import OSMRecommender
 
 
 app = FastAPI(title="Restaurant Recommender GenAI API")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-recommender = RestaurantRecommender()
+recommender = OSMRecommender()
 
 @app.get("/", response_class=HTMLResponse)
 def home():
@@ -16,7 +16,7 @@ def home():
         return f.read()
 
 @app.get("/recommend")
-def recommend(query: str, user_lat: float, user_lon: float, k: int = 3):
-    results = recommender.recommend_restaurants(query, user_lat, user_lon, k)
+def recommend(query: str, user_lat: float, user_lon: float, radius: float = 100.0,  k: int = 5):
+    results = recommender.recommend(query, user_lat, user_lon, radius, k)
     return {"results": results}
 

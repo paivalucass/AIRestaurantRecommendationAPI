@@ -1,0 +1,153 @@
+# app/osm_recommend.py
+
+import requests
+import faiss
+import numpy as np
+from math import radians, cos, sin, asin, sqrt
+from sentence_transformers import SentenceTransformer
+
+
+OVERPASS_URL = "http://overpass-api.de/api/interpreter"
+
+OVERPASS_QUERY = """
+[out:json][timeout:20];
+(
+  node["amenity"="restaurant"](around:{radius},{lat},{lon});
+  node["amenity"="fast_food"](around:{radius},{lat},{lon});
+  node["amenity"="cafe"](around:{radius},{lat},{lon});
+  node["amenity"="bar"](around:{radius},{lat},{lon});
+  node["amenity"="pub"](around:{radius},{lat},{lon});
+);
+out center;
+"""
+
+class OSMRecommender:
+
+    def __init__(self):
+        print("Loading embedding model...")
+        self.model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
+    def __fetch_osm_restaurants(self, lat, lon, radius=1000):
+        query = OVERPASS_QUERY.format(radius=radius, lat=lat, lon=lon)
+        url = OVERPASS_URL
+
+        try:
+            response = requests.post(url, data=query, timeout=25)
+            
+            # Check status code
+            if response.status_code != 200:
+                print("Overpass error:", response.status_code, response.text[:200])
+                return []
+
+            # Try decode JSON
+            try:
+                data = response.json()
+            except Exception as e:
+                print("Overpass returned invalid JSON:")
+                print(response.text[:300])  # print a snippet to debug
+                return []
+
+            # Valid result
+            if "elements" not in data:
+                print("No 'elements' in Overpass response:", data)
+                return []
+
+            restaurants = [self.__normalize_osm(r) for r in data["elements"]]
+            print(restaurants[0])
+            return [r for r in restaurants if r is not None]
+
+        except requests.exceptions.Timeout:
+            print("Overpass API timeout")
+            return []
+
+        except Exception as e:
+            print("Unexpected Overpass error:", e)
+            return []
+
+
+    def __normalize_osm(self, node):
+        tags = node.get("tags", {})
+
+        if "name" not in tags:
+            return None
+
+        return {
+            "id": node.get("id"),
+            "name": tags.get("name", "Unknown"),
+            "cuisine": tags.get("cuisine", "unknown"),
+            "opening_hours": tags.get("opening_hours", "unknown"),
+            "lat": node.get("lat"),
+            "lon": node.get("lon"),
+            "city": tags.get("addr:city", "unknown"),
+            "street": tags.get("addr:street", "unknown"),
+            "neighborhood": tags.get("addr:suburb", "unknown"),
+            "number": tags.get("addr:housenumber", "unknown"),
+            "amenity": tags.get("amenity", "unknown")
+        }
+
+    def __build_description(self, r):
+        return (
+            f"{r['name']}. "
+            f"Cuisine: {r['cuisine']}. "
+            f"Opening hours: {r['opening_hours']}. "
+            f"Located at coordinates {r['lat']}, {r['lon']}."
+            f"City: {r['city']}."
+            f"Street: {r['street']}"
+            f"Neighborhood: {r['neighborhood']}"
+            f"Amenity: {r['amenity']}"
+        )
+
+    def __haversine(self, lat1, lon1, lat2, lon2):
+        R = 6371
+        dlat = radians(lat2 - lat1)
+        dlon = radians(lon2 - lon1)
+
+        a = sin(dlat/2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon/2)**2
+        c = 2 * asin(sqrt(a))
+        return R * c
+    
+    def recommend(self, user_query, user_lat, user_lon, radius=1000, k=5):
+        # 1. Fetch restaurants
+        restaurants = self.__fetch_osm_restaurants(user_lat, user_lon, radius)
+
+        if not restaurants:
+            return []
+
+        # 2. Build embeddings
+        descriptions = [self.__build_description(r) for r in restaurants]
+        embeddings = self.model.encode(descriptions, convert_to_tensor=False)
+        embeddings = np.array(embeddings).astype("float32")
+
+        # 3. FAISS index
+        faiss.normalize_L2(embeddings)
+        index = faiss.IndexFlatIP(embeddings.shape[1])
+        index.add(embeddings)
+
+        # 4. Encode query
+        query_emb = self.model.encode(user_query, convert_to_tensor=False)
+        query_emb = np.array(query_emb).astype("float32")
+        faiss.normalize_L2(query_emb.reshape(1, -1))
+
+        # 5. Similarity search
+        distances, indices = index.search(query_emb.reshape(1, -1), k)
+
+        # 6. Score + sort
+        ranked = []
+        for idx, sim in zip(indices[0], distances[0]):
+            r = restaurants[idx]
+
+            # distance to user
+            dist_km = self.__haversine(user_lat, user_lon, r["lat"], r["lon"])
+            dist_score = max(0, 1 - dist_km / (radius/1000))  # 0 at 5 km+
+
+            final_score = (0.6 * float(sim)) + (0.4 * dist_score)
+
+            r_out = r.copy()
+            r_out["similarity"] = float(sim)
+            r_out["distance_km"] = dist_km
+            r_out["final_score"] = final_score
+
+            ranked.append(r_out)
+
+        ranked.sort(key=lambda x: x["final_score"], reverse=True)
+        return ranked[:k]
