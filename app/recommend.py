@@ -51,9 +51,9 @@ class RestaurantRecommender:
 
             # Weighted final score
             final_score = (
-                0.6 * float(sim) +
+                0.4 * float(sim) +
                 0.25 * rating_score +
-                0.15 * distance_score
+                0.35 * distance_score
             )
 
             r_out = r.copy()

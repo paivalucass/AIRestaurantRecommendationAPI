@@ -1,3 +1,24 @@
+
+function getLocation() {
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            console.log("Position received:", pos);
+            document.getElementById("lat").value = pos.coords.latitude.toFixed(6);
+            document.getElementById("lon").value = pos.coords.longitude.toFixed(6);
+        },
+
+        (err) => {
+            console.error("Geolocation error:", err);
+            alert("Unable to retrieve your location. Error: " + err.message);
+        }
+    );
+}
+
 async function recommend() {
     const query = document.getElementById("query").value;
     const lat = parseFloat(document.getElementById("lat").value);

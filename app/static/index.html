@@ -12,9 +12,11 @@
 
         <div class="form">
             <input id="query" type="text" placeholder="What are you in the mood for? (e.g. sushi, cheap pizza…)">
-
+            
             <input id="lat" type="number" step="0.000001" placeholder="Your Latitude">
             <input id="lon" type="number" step="0.000001" placeholder="Your Longitude">
+            
+            <button onclick="getLocation()">Use My Location</button>
 
             <button onclick="recommend()">Recommend</button>
         </div>
