@@ -1,4 +1,4 @@
-# AI Restaurant Recommendation Chatbot (Qwen2-1.5B-Instruct) 🍜
+# AI Restaurant Recommendation Chatbot using RAG (Qwen2-1.5B-Instruct) 🍜
 
 ## [[Check out this project on Hugging Face 🤗]](https://huggingface.co/spaces/paivalucass/ai-restaurant-recommend)
 
@@ -44,7 +44,7 @@ sentence-transformers/all-MiniLM-L6-v2
 
 5. Embeddings are indexed using FAISS (Inner Product search with L2 normalization).
 
-6. User query is embedded and compared to all restaurants.
+6. User query is embedded and compared to all restaurants (RAG).
 
 7. Results are ranked using a blended score:
 
