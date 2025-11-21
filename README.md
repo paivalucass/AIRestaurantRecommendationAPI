@@ -1,6 +1,20 @@
-# AI Restaurant Recommendation API (LLAMA 3.2)
+---
+title: Ai Restaurant Recommendation Chabot
+emoji: 🐨
+colorFrom: yellow
+colorTo: pink
+sdk: docker
+pinned: false
+license: mit
+short_description: LLM based Restaurant Recommendation chat bot.
+---
 
-This project implements an intelligent restaurant recommendation system using OpenStreetMap, sentence-transformer embeddings, FAISS vector search, and an LLM assistant (Llama 3.2 Instruct).
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+
+
+# AI Restaurant Recommendation Chatbot (Qwen2-1.5B-Instruct) 🍜
+
+This project implements an intelligent restaurant recommendation system using OpenStreetMap, sentence-transformer embeddings, FAISS vector search, and an LLM assistant (Qwen2-1.5B-Instruct).
 It provides two main features:
 
 1. **Embedding-based restaurant recommendations**
@@ -54,7 +68,7 @@ sentence-transformers/all-MiniLM-L6-v2
 
    - The selected restaurants are fed into an LLM prompt.
 
-   - Llama-3.2-1B-Instruct generates a human-friendly explanation.
+   - Qwen2-1.5B-Instruct generates a human-friendly explanation.
 
 ## 2. Technologies Used
 #### **Core**
@@ -105,7 +119,7 @@ The endpoint:
 
 2. Creates a structured chat template.
 
-3. Uses Llama-3.2-1B-Instruct.
+3. Uses Qwen2-1.5B-Instruct.
 
 4. Returns a natural-language text response recommending the top 4 best restaurant for the user's query.
 
@@ -123,7 +137,7 @@ The endpoint:
 
 ### LLM Model
 
-- **meta-llama/Llama-3.2-1B-Instruct**
+- **Qwen/Qwen2-1.5B-Instruct**
 
 - Runs on CPU in this project
 
@@ -145,7 +159,7 @@ uvicorn app.main:app --reload
 
 Then open:
 ```
-http://localhost:8000
+http://localhost:7860
 ```
 
 ## 6. Docker Deployment
@@ -155,12 +169,12 @@ docker build -t restaurant-ai .
 ```
 ### Run the container
 ```
-docker run -p 8000:8000 restaurant-ai
+docker run -p 7860:7860 restaurant-ai
 ```
 
 Your API and frontend will be available at:
 ```
-http://localhost:8000
+http://localhost:7860
 ```
 
 ## 7. Project Structure

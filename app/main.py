@@ -8,7 +8,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
 # Name of the local Llama model used for generating natural language responses.
-MODEL_NAME = "meta-llama/Llama-3.2-1B-Instruct"
+MODEL_NAME = "Qwen/Qwen2-1.5B-Instruct"
 
 # Create the FastAPI application.
 app = FastAPI(title="Restaurant Recommender GenAI API")
@@ -53,76 +53,57 @@ def recommend(query: str, user_lat: float, user_lon: float, radius: float = 100.
 @app.get("/chat")
 def recommend_llm(query: str, user_lat: float, user_lon: float, radius: float = 100.0, k: int = 20):
 
-    # Retrieve restaurants from Overpass + embedding ranking.
     results = recommender.recommend(query, user_lat, user_lon, radius, k)
     if not results:
         return {"response": "Sorry, I couldn't find any restaurants nearby."}
 
-    # Construct the message format expected by Llama 3's chat template.
-    # The system message instructs the model to respond clearly and without Markdown.
-    # The user message includes the query and the list of nearby restaurants.
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are a restaurant recommendation assistant.\n"
-                "Rules:\n"
-                "- Do not use Markdown.\n"
-                "- Use simple, natural phrasing.\n"
-                "- Output plain text only."
-            )
-        },
-        {
-            "role": "user",
-            "content": (
-                f"I want food like: '{query}'.\n\n"
-                "Here are nearby restaurants:\n" +
-                "\n".join([
-                    f"- {r['name']} ({r['cuisine']}), {r['distance_km']:.1f} km"
-                    for r in results
-                ]) +
-                "\n\nSelect the best 5 options and explain the reason for each choice. "
-                "Do not invent information."
-            )
-        }
-    ]
+    # Build list of restaurants
+    restaurant_list = "\n".join([
+        f"- {r['name']} ({r['cuisine']}), {r['distance_km']:.1f} km"
+        for r in results
+    ])
 
-    # Convert the messages to model-ready tensors using Llama's chat template.
-    encoded = tokenizer.apply_chat_template(
-        messages,
-        return_tensors="pt",
-        add_generation_prompt=True,
-        padding=True
-    )
+    # Qwen-style structured chat prompt
+    prompt = f"""
+        <|im_start|>system
+        You are a restaurant recommendation assistant.
+        Rules:
+        - Do not use Markdown.
+        - Do not invent information.
+        - Use simple natural language.
+        - Only use the details given to you.
+        - Do not create details that are not given to you.
+        <|im_end|>
 
-    input_ids = encoded.to(device)
-    attention_mask = (input_ids != tokenizer.pad_token_id).long().to(device)
+        <|im_start|>user
+        I want food like: '{query}'.
 
-    # Generate the assistant's response.
+        Here are nearby restaurants:
+        {restaurant_list}
+
+        Select the best 3 options and explain why each was chosen.
+        Do not add details that are not included above.
+        <|im_end|>
+
+        <|im_start|>assistant
+        """
+
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+
     outputs = model.generate(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        max_new_tokens=200,
-        temperature=0.7,
-        do_sample=True,
+        **inputs,
+        max_new_tokens=350,
+        temperature=0.3,
+        do_sample=True
     )
 
-    # Decode the raw text returned by the model.
     response_text = tokenizer.decode(outputs[0], skip_special_tokens=False)
 
-    # The generated text includes the model's internal chat headers.
-    # This extracts only the final assistant message.
-    assistant_tag = "<|start_header_id|>assistant<|end_header_id|>"
-    start = response_text.rfind(assistant_tag)
+    # Extract only the final assistant response
+    if "<|im_start|>assistant" in response_text:
+        response_text = response_text.split("<|im_start|>assistant")[-1].strip()
 
-    if start != -1:
-        # Keep only the section after the assistant header.
-        answer = response_text[start + len(assistant_tag):].strip()
-    else:
-        # Fallback: strip special tokens.
-        answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    if "<|im_end|>" in response_text:
+        response_text = response_text.split("<|im_end|>")[0].strip()
 
-    # Remove the end-of-turn token if present.
-    answer = answer.replace("<|eot_id|>", "").strip()
-
-    return {"response": answer}
+    return {"response": response_text}
