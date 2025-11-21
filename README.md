@@ -1,20 +1,21 @@
 ---
 title: Ai Restaurant Recommendation Chabot
-emoji: 🐨
-colorFrom: yellow
+emoji: 🍜
+colorFrom: red
 colorTo: pink
 sdk: docker
-pinned: false
+pinned: true
 license: mit
-short_description: LLM based Restaurant Recommendation chat bot.
+short_description: LLM based Restaurant Recommendation chatbot.
 ---
-
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
-
 
 # AI Restaurant Recommendation Chatbot (Qwen2-1.5B-Instruct) 🍜
 
+[Check out this project on Hugging Face!!](https://www.genome.gov/)
+
 This project implements an intelligent restaurant recommendation system using OpenStreetMap, sentence-transformer embeddings, FAISS vector search, and an LLM assistant (Qwen2-1.5B-Instruct).
+
+
 It provides two main features:
 
 1. **Embedding-based restaurant recommendations**
