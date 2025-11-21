@@ -2,33 +2,103 @@ body {
     font-family: Arial, sans-serif;
     background: #fafafa;
     margin: 0;
-    padding: 20px;
+    padding: 0;
 }
 
-.container {
+/* Main chat card */
+.chat-container {
     max-width: 650px;
-    margin: auto;
-    text-align: center;
+    margin: 35px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
+/* Title */
 h1 {
-    margin-bottom: 25px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-.form {
+/* Lat/lon inputs */
+.location-panel {
     display: flex;
-    flex-direction: column;
     gap: 10px;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
-input {
+.location-panel input {
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #ddd;
     font-size: 16px;
+    flex: 1;
 }
 
+.location-panel button {
+    padding: 12px;
+    border: none;
+    color: white;
+    background: #ff3d00;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.location-panel button:hover {
+    background: #d93600;
+}
+
+/* Chat log */
+.chat-log {
+    height: 350px;
+    overflow-y: auto;
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: #f7f7f7;
+}
+
+.chat-message {
+    max-width: 80%;
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-radius: 12px;
+    line-height: 1.4;
+}
+
+/* User bubble */
+.chat-user {
+    background: #ff3d00;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 0;
+}
+
+/* Bot bubble */
+.chat-bot {
+    background: #ececec;
+    color: #333;
+    margin-right: auto;
+    border-bottom-left-radius: 0;
+}
+
+/* Input area */
+.chat-input-area {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.chat-input-area input {
+    flex-grow: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+/* Buttons */
 button {
     padding: 12px;
     border: none;
@@ -36,18 +106,46 @@ button {
     background: #ff3d00;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 button:hover {
     background: #d93600;
 }
 
-.restaurant {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    text-align: left;
+/* Loading animation */
+.loading {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: #ccc;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+}
+
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0% { opacity: 0.2; transform: translateY(0); }
+    20% { opacity: 1; transform: translateY(-3px); }
+    40% { opacity: 0.2; transform: translateY(0); }
+}
+
+/* Signature */
+.signature {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #777;
 }

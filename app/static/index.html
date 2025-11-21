@@ -7,21 +7,33 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1>AI Restaurant Recommender</h1>
+    <div class="chat-container">
 
-        <div class="form">
-            <input id="query" type="text" placeholder="What are you in the mood for? (e.g. sushi, cheap pizza…)">
-            
+        <h1>AI Restaurant Assistant</h1>
+
+        <!-- Location inputs (still needed) -->
+        <div class="location-panel">
             <input id="lat" type="number" step="0.000001" placeholder="Your Latitude">
             <input id="lon" type="number" step="0.000001" placeholder="Your Longitude">
-            
             <button onclick="getLocation()">Use My Location</button>
-
-            <button onclick="recommend()">Recommend</button>
         </div>
 
-        <div id="results"></div>
+        <div id="chat-log" class="chat-log"></div>
+
+        <div id="loading" class="loading" style="display:none;">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        
+        <div class="chat-input-area">
+            <input id="chat-query" type="text" placeholder="Ask about restaurants...">
+            <button onclick="sendChat()">Send</button>
+        </div>
+
+        <!-- Signature -->
+        <div class="signature">
+            Built by Lucas Paiva © 2025
+        </div>
+
     </div>
 
     <script src="/static/script.js"></script>

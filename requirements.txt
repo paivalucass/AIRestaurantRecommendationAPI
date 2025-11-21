@@ -7,3 +7,5 @@ scikit-learn
 ftfy
 numpy
 faiss-cpu
+tiktoken
+protobuf

@@ -6,58 +6,57 @@ function getLocation() {
 
     navigator.geolocation.getCurrentPosition(
         (pos) => {
-            console.log("Position received:", pos);
             document.getElementById("lat").value = pos.coords.latitude.toFixed(6);
             document.getElementById("lon").value = pos.coords.longitude.toFixed(6);
         },
-
         (err) => {
-            console.error("Geolocation error:", err);
-            alert("Unable to retrieve your location. Error: " + err.message);
+            alert("Unable to retrieve your location. " + err.message);
         }
     );
 }
 
-async function recommend() {
-    const query = document.getElementById("query").value;
+async function sendChat() {
+    const query = document.getElementById("chat-query").value.trim();
     const lat = parseFloat(document.getElementById("lat").value);
     const lon = parseFloat(document.getElementById("lon").value);
+    const chatLog = document.getElementById("chat-log");
 
-    if (!query || isNaN(lat) || isNaN(lon)) {
-        alert("Please fill all fields");
-        return;
-    }
+    if (!query) return;
 
+    // USER MESSAGE
+    const userDiv = document.createElement("div");
+    userDiv.className = "chat-message chat-user";
+    userDiv.textContent = query;
+    chatLog.appendChild(userDiv);
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    document.getElementById("chat-query").value = "";
+
+    // AI TYPING PLACEHOLDER
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "chat-message chat-bot loading";
+    loadingDiv.innerHTML = `
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+    `;
+    chatLog.appendChild(loadingDiv);
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    // API REQUEST
     const res = await fetch(
-        `/recommend?query=${encodeURIComponent(query)}&user_lat=${lat}&user_lon=${lon}&radius=20000`
+        `/chat?query=${encodeURIComponent(query)}&user_lat=${lat}&user_lon=${lon}&radius=20000`
     );
 
     const data = await res.json();
-    console.log("API response:", data);
 
-    const results = Array.isArray(data) ? data : data.results;
+    // REMOVE LOADING AND REPLACE WITH AI ANSWER
+    loadingDiv.remove();
 
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
+    const botDiv = document.createElement("div");
+    botDiv.className = "chat-message chat-bot";
+    botDiv.textContent = data.response;
+    chatLog.appendChild(botDiv);
 
-    if (!results || results.length === 0) {
-        resultsDiv.innerHTML = "<p>No restaurants found</p>";
-        return;
-    }
-
-    results.forEach(r => {
-        const div = document.createElement("div");
-        div.className = "restaurant";
-        div.innerHTML = `
-            <h2>${r["name"]}</h2>
-            <p><strong>Cuisines:</strong> ${r.cuisine}</p>
-            <p><strong>Rating (Distance + AI match):</strong> ${r.final_score?.toFixed(2)}</p>
-            <p><strong>Distance:</strong> ${r.distance_km?.toFixed(2) ?? "?"} km</p>
-            <p><strong>Opening Hours:</strong> ${r["opening_hours"]}</p>
-            <p><strong>City:</strong> ${r["city"]}</p>
-            <p><strong>Street:</strong> ${r["street"]}</p>
-            <p><strong>Neighborhood:</strong> ${r["neighborhood"]}</p>
-        `;
-        resultsDiv.appendChild(div);
-    });
+    chatLog.scrollTop = chatLog.scrollHeight;
 }
