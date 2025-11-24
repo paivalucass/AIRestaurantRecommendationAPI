@@ -1,4 +1,4 @@
-# AI Restaurant Recommendation Chatbot using RAG (Qwen2-1.5B-Instruct) 🍜
+# AI Restaurant Recommendation Chatbot (Qwen2-1.5B-Instruct) 🍜
 
 ## [[Check out this project on Hugging Face 🤗]](https://huggingface.co/spaces/paivalucass/ai-restaurant-recommend)
 
