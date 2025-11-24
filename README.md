@@ -9,7 +9,7 @@ It provides two main features:
 
 1. **Embedding-based restaurant recommendations**
 
-2. **A conversational AI assistant that explains and selects the best restaurants based on the retrieved data.**
+2. **A conversational AI assistant that explains and selects the best restaurants based on the user's location.**
 
 The system is built with FastAPI, Sentence Transformers, FAISS, PyTorch, Transformers, and Docker.
 
